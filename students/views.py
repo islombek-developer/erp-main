@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from users.permissionmixin import StudentRequiredMixin
 from django.views import View
 from users.models import Student, Team,User
-from .forms import HomeworkForm
-from .models import Lesson, Homework
+from .forms import HomeworkForm,DavomatForm
+from .models import Lesson, Homework,Davomat
 from users.forms import ProfileForm,ResetPasswordForm
 
 class StudentDashboardView(StudentRequiredMixin, View):
@@ -91,3 +91,17 @@ class ResetPasswordView(LoginRequiredMixin,View):
             return redirect('/')
         form = ResetPasswordForm()
         return render(request, 'students/reset_password.html', {'form':form})
+    
+class DavomatListView(View):
+    def get(self, request):
+        davomat_list = Davomat.objects.all()
+        form = DavomatForm()
+        return render(request, 'students/davomat_list.html', {'davomat_list': davomat_list, 'form': form})
+
+    def post(self, request):
+        form = DavomatForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('davomat_list')
+        davomat_list = Davomat.objects.all()
+        return render(request, 'students/davomat_list.html', {'davomat_list': davomat_list, 'form': form})

@@ -1,5 +1,6 @@
 from django.db import models
-from users.models import Team,Student
+from users.models import Team,Student,Teacher
+from django.core.validators import MaxValueValidator,FileExtensionValidator
 
 class Lesson(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='lesson')
@@ -7,6 +8,13 @@ class Lesson(models.Model):
     date = models.DateField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     homework_status = models.BooleanField(default=False)
+    homework_file = models.FileField(  null=True,blank=True)
+    video = models.FileField(
+        upload_to='video/', 
+        validators=[FileExtensionValidator(allowed_extensions=['mp4', 'mp3', 'AVI', 'WMV'])],
+        null=True,
+        blank=True
+    )
 
 
     class Meta:
@@ -29,3 +37,19 @@ class Homework(models.Model):
 
     def __str__(self):
         return f"{self.student.user.first_name}-- {self.lesson.title}"
+
+class Davomat(models.Model):
+    team = models.ForeignKey(Team,on_delete=models.CASCADE,related_name='team',null=True,blank=True)
+    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    data = models.DateTimeField(auto_now_add=True)
+    status = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return f"{self.student} --> ,{self.data} --> {'Present' if self.status else 'Absent'}"
+    
+class Homeworkcheck(models.Model):
+    Homework = models.ForeignKey(Homework,on_delete=models.CASCADE)
+    evaluated_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True, related_name='evaluated_homeworks')
+    grade = models.PositiveIntegerField(validators=[MaxValueValidator(100)], blank=True, null=True)
+    comments = models.TextField(blank=True, null=True)
+    date = models.DateTimeField(auto_now_add=True)

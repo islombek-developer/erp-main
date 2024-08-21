@@ -3,10 +3,11 @@ from django.shortcuts import render,get_object_or_404,redirect
 from  users.permissionmixin import TeacherRequiredMixin
 from  django.views import  View
 from  users.models import Teacher,Student,User
-from  students.models import Lesson,Team,Homework
+from  students.models import Lesson,Team,Homework,Davomat
 from users.forms import ProfileForm,ResetPasswordForm
-from .forms import CreateLessonForm
+from .forms import CreateLessonForm,DavomatForm
 from django.urls import reverse
+from django.contrib import messages
 
 class TeacherView(TeacherRequiredMixin,View):
     def get(self,request):
@@ -100,3 +101,42 @@ class TeacherStudentLeson(TeacherRequiredMixin, View):
         homeworks = Homework.objects.filter(lesson=lesson)
         students = [homework.student for homework in homeworks]
         return render(request, 'teachers/students.html', {'students': students})
+
+class DavomatListView(View):
+    def get(self, request, id):
+        team = get_object_or_404(Team, id=id)
+        students = team.students.all()
+        davomat_records = Davomat.objects.filter(team=team)
+        
+        # Create a dictionary to easily access attendance status per student
+        student_attendance = {
+            student.id: {
+                'name': student.user.first_name,
+                'status': next((d.status for d in davomat_records if d.student == student), False)
+            }
+            for student in students
+        }
+        
+        form = DavomatForm()
+        return render(request, 'teachers/davomat_list.html', {
+            'students': students,
+            'team': team,
+            'student_attendance': student_attendance,
+            'form': form
+        })
+
+    def post(self, request, id):
+        team = get_object_or_404(Team, id=id)
+        students = team.students.all()
+
+        # Process attendance for each student
+        for student in students:
+            status = request.POST.get(f'status_{student.id}', 'off') == 'on'
+            Davomat.objects.update_or_create(
+                team=team,
+                student=student,
+                defaults={'status': status}
+            )
+
+        messages.success(request, "Attendance saved successfully.")
+        return redirect('teachers:student')    # Ensure this matches your URL pattern
