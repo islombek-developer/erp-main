@@ -27,13 +27,10 @@
           <a class="nav-link" href="{% url 'teachers:guruh' team.id %}">Darslar</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'teachers:homeworks' team.id %}">Uyga Vazifalar</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Yoqlama</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="{% url 'teachers:student' team.id %}">O'quvchilar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'teachers:davomat_list' team.id %}">Yoqlama</a>
         </li>
       </ul>
       <ul class="nav-item">
@@ -47,25 +44,33 @@
 <br>
 <table class="table">
     <thead>
-      <tr>
-        <th scope="col">Title</th>
-        <th scope="col">Date</th>
-        <th scope="col">Homework status</th>
-      </tr>
+        <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Date</th>
+            <th scope="col">Homework Status</th>
+            <th scope="col">lesson file</th>
+
+        </tr>
     </thead>
     <tbody>
-      {% for lesson in lessons %}
-      <tr class="table-info">
-          {% if lesson.title %}
-          <td><a href="{% url 'teachers:stydents' lesson.id %}">{{ lesson.title }}</a></td>
-          {% else %}
-          <td>{{ lesson.description }}</td>
-          {% endif %}
-          <td>{{ lesson.date }}</td>
-          <td>Active</td>
-      </tr>
-      {% endfor %}
-  </tbody>
-  </table>
+        {% for lesson in lessons %}
+        <tr class="table-info">
+            <td>
+                <a href="{% url 'teachers:stydents' lesson.id %}">{{ lesson.title }}</a>
+            </td>
+            <td>{{ lesson.date }}</td>
+            <td>{{ lesson.homework_status|yesno:"Active,Inactive" }}</td>
+            <td>
+              {% if lesson.lesson_file %}
+              <a href="{{ lesson.lesson_file.url }}">{{lesson.lesson_file}}</a>
+              {% else %}
+              No File
+              {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 
 {% endblock content %}

@@ -8,6 +8,7 @@
         <th scope="col">Titel</th>
         <th scope="col">Date</th>
         <th scope="col">Status</th>
+        <th scope="col">lesson file</th>
       </tr>
     </thead>
     <tbody>
@@ -23,6 +24,13 @@
             <a href="{% url 'students:homework' lesson.id %}" class="btn btn-danger">Bajarilmagan</a>
             {% endif %}
           </td>
+          <td>
+            {% if lesson.lesson_file %}
+            <a href="{{ lesson.lesson_file.url }}">{{lesson.lesson_file}}</a>
+            {% else %}
+            No File
+            {% endif %}
+        </td>
         </tr>
       {% endfor %}
     </tbody>

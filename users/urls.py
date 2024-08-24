@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import LoginView, RegisterView,ProfileView,EditProfileView,Create,LogautView,GroupsView,StudentView,EditStudentView,Delete,StudentByTeam,ResetPasswordView,AdminDashboardView
+from .views import (LoginView, RegisterView,ProfileView,EditProfileView,Create,TeamStudentListView,
+                    LogautView,GroupsView,StudentView,EditStudentView,Delete,StudentByTeam,
+                    ResetPasswordView,AdminDashboardView,CreateTeamView,DeleteTeamView)
 
 app_name = 'users'
 
@@ -18,4 +20,7 @@ urlpatterns = [
     path('edit-student/<int:id>/', EditStudentView.as_view(), name='edit_student'),
     path('delete/<int:id>/', Delete.as_view(), name='delete'),
     path('resed-password', ResetPasswordView.as_view(), name='resed_password'),
+    path('create-team/', CreateTeamView.as_view(), name='create_team'),
+    path('delete-team/<int:id>/', DeleteTeamView.as_view(), name='delete_team'),
+    path('team/student/create/', TeamStudentListView.as_view(), name='create_student'),
 ]

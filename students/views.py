@@ -16,6 +16,11 @@ class StudentGroupView(StudentRequiredMixin, View):
         student = Student.objects.get(user=request.user)
         return render(request, 'students/guruhlarim.html', context={"student":student})
     
+class HomeworkListView(View):
+    def get(self, request, lesson_id):
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        homeworks = Homework.objects.filter(lesson=lesson)
+        return render(request, 'students/homework.html', {'lesson': lesson, 'homeworks': homeworks})
 
 class StudentLessonsView(StudentRequiredMixin, View):
     def get(self, request, group_id):

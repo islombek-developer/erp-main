@@ -2,30 +2,33 @@
 
 {% block content %}
 <div class="mt-5">
-  <h4>{{ team.name }} </h4>
+  <h4>{{ lesson.title }} - Student Homework Submissions</h4>
 </div>
 <br>
 
-<br>
 <table class="table">
     <thead>
       <tr>
-        <th scope="col">First name</th>
-        <th scope="col">team</th>
-        <th scope="col">Homework status</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Team</th>
+        <th scope="col">Homework Status</th>
+        <th scope="col">Homework File</th>
       </tr>
     </thead>
-    <tbody >
-      <tbody>
-        {% for i in students %}
+    <tbody>
+        {% for homework in homeworks %}
         <tr class="table-info">
-            <td>{{ i.user.first_name }}</td>
-            <td>{{ i.team.name }}</td>
-            <td>Active</td>
+             <td><a href="#">{{ homework.student.user.first_name }}</a></td> <td>{{ homework.student.team.name }}</td>
+            <td>{{ homework.lesson.homework_status|yesno:"Active,Inactive" }}</td>
+            <td>
+              {% if homework.homework_file %}
+              <a href="{{ homework.homework_file.url }}">{{homework.homework_file}}</a>
+              {% else %}
+              No File
+              {% endif %}
+          </td>
         </tr>
         {% endfor %}
     </tbody>
-    </tbody>
   </table>
-
 {% endblock content %}

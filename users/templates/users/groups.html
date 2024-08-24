@@ -8,6 +8,8 @@
         <th>Title</th>
         <th>Status</th>
         <th>Actions</th>
+        <th><a class="btn btn-outline-success" href="{% url 'users:create_team'  %}">create</a></th>
+
       </tr>
     </thead>
     <tbody>
@@ -22,6 +24,9 @@
         
         <td>
           <a class="btn btn-outline-info" href="{% url 'users:students_by' i.id %}">Show</a>
+        </td>
+        <td>
+          <a class="btn btn-outline-danger" href="{% url 'users:delete_team' i.id %}">delete</a>
         </td>
       </tr>
     {% endfor %}

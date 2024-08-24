@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import  TeacherView,TeacherTimesView,TeacherGroup,TeacherHomeworks,TeacherStudentsView,ProfileView,EditProfileView,ResetPasswordView,TeacherCreateLessonView,TeacherStudentLeson,DavomatListView
+from .views import  (TeacherView,TeacherTimesView,TeacherGroup,TeacherHomeworks,
+                     TeacherStudentsView,ProfileView,EditProfileView,ResetPasswordView,
+                     TeacherCreateLessonView,TeacherStudentLeson,DavomatListView)
 
 app_name = 'teachers'
 

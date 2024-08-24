@@ -7,7 +7,7 @@ from  students.models import Lesson,Team,Homework,Davomat
 from users.forms import ProfileForm,ResetPasswordForm
 from .forms import CreateLessonForm,DavomatForm
 from django.urls import reverse
-from django.contrib import messages
+
 
 class TeacherView(TeacherRequiredMixin,View):
     def get(self,request):
@@ -78,29 +78,42 @@ class ResetPasswordView(LoginRequiredMixin,View):
         form = ResetPasswordForm()
         return render(request, 'teachers/reset_password.html', {'form':form})
 
+
 class TeacherCreateLessonView(TeacherRequiredMixin, View):
     def get(self, request, team_id):
         form = CreateLessonForm()
-        return render(request, 'teachers/create_lesson.html', context={"form":form})
-    
+        return render(request, 'teachers/create_lesson.html', {'form': form})
+
     def post(self, request, team_id):
         team = get_object_or_404(Team, id=team_id)
-        form = CreateLessonForm(request.POST)
+        form = CreateLessonForm(request.POST, request.FILES)
         if form.is_valid():
-            lesson = Lesson()
-            lesson.team = team
-            lesson.title = form.cleaned_data['title']
+            lesson = Lesson(
+                team=team,
+                title=form.cleaned_data['title'],
+                lesson_file=form.cleaned_data['lesson_file'],
+            )
             lesson.save()
             url = reverse('teachers:homeworks', args=[team_id])
             return redirect(url)
+        return render(request, 'teachers/create_lesson.html', {'form': form})
+
 
 class TeacherStudentLeson(TeacherRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        id = kwargs.get('id')  
-        lesson = get_object_or_404(Lesson, id=id)
-        homeworks = Homework.objects.filter(lesson=lesson)
-        students = [homework.student for homework in homeworks]
-        return render(request, 'teachers/students.html', {'students': students})
+        lesson_id = kwargs.get('id')  
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        homeworks = Homework.objects.filter(lesson=lesson).select_related('student', 'team')
+        return render(request, 'teachers/students.html', {'homeworks': homeworks, 'lesson': lesson})
+
+class TeacherHomeworkListView(TeacherRequiredMixin, View):
+    def get(self, request):
+        lessons = Lesson.objects.filter(team__teacher=request.user.teacher)
+        homeworks = Homework.objects.filter(lesson__in=lessons).select_related('student__user', 'lesson')
+        return render(request, 'teachers/homework_list.html', {'homeworks': homeworks})
+
+
+
 
 class DavomatListView(View):
     def get(self, request, id):
@@ -139,4 +152,4 @@ class DavomatListView(View):
             )
 
         messages.success(request, "Attendance saved successfully.")
-        return redirect('teachers:student')    # Ensure this matches your URL pattern
+        return redirect('teachers:student')   

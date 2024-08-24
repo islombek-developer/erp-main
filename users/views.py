@@ -1,11 +1,27 @@
 from django.contrib.auth import authenticate, login,logout
 from django.shortcuts import render, redirect,get_object_or_404
 from django.views import View
-from .forms import LoginForm, RegisterForm,ProfileForm,StudentEditForm,ResetPasswordForm
+from .forms import LoginForm, RegisterForm,ProfileForm,StudentEditForm,TeamForm,ResetPasswordForm,StudentForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import User,Student,Team,Teacher
 from .permissionmixin import AdminRequiredMixin,StudentRequiredMixin,TeacherRequiredMixin
 from django.db.models import Q
+from django.db import IntegrityError
+
+class TeamStudentListView(View):
+    def get(self, request):
+        form = StudentForm()
+        return render(request, 'users/create_student.html', {'form': form})
+
+    def post(self, request):
+        form = StudentForm(request.POST)
+        if form.is_valid():
+            try:
+                student = form.save()
+                return redirect('/dashboard')  # Redirect to a relevant page after creation
+            except IntegrityError:
+                form.add_error('username', 'Username already exists')
+        return render(request, 'users/create_student.html', {'form': form})     
 
 class LoginView(View):
     def get(self, request):
@@ -31,34 +47,34 @@ class LoginView(View):
         form = LoginForm()
         return render(request, 'users/login.html', {'form': form})
 
-class RegisterView(AdminRequiredMixin, View):
 
+class RegisterView(AdminRequiredMixin, View):
+    
     def get(self, request):
         form = RegisterForm()
         return render(request, 'users/register.html', {'form': form})
 
     def post(self, request):
         form = RegisterForm(request.POST)
+        
         if form.is_valid():
             user = form.save(commit=False)
             password = form.cleaned_data['password']
             user.set_password(password)
             user.save()
-
+            
             if user.user_role == 'student':
-                newstudent = Student()
-                newstudent.user = user  
-                newstudent.save()
-
+                Student.objects.create(user=user)
+                
             elif user.user_role == 'teacher':
-                newteacher = Teacher()
-                newteacher.user = user
-                newteacher.save()
-
-
-
-            return redirect('/')
-
+                newteacher = Teacher.objects.create(user=user)
+                
+                if form.cleaned_data['team']:
+                    team = form.cleaned_data['team']
+                    team.teacher = newteacher
+                    team.save()
+            
+            return redirect('/dashboard')
         return render(request, 'users/register.html', {'form': form})
 
 class ProfileView(LoginRequiredMixin,View):
@@ -109,6 +125,24 @@ class GroupsView(View):
     def get(self,request):
         teams = Team.objects.all()
         return render(request,'users/groups.html',{"teams":teams})
+
+class CreateTeamView(View):
+    def get(self, request):
+        form = TeamForm()
+        return render(request, 'users/create1.html', {'form': form})
+
+    def post(self, request):
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            team = form.save()
+            return redirect('/dashboard') 
+        return render(request, 'users/create1.html', {'form': form})
+
+class DeleteTeamView(AdminRequiredMixin, View):
+    def get(self, request, id):
+        team = get_object_or_404(Team, id=id)
+        team.delete()
+        return redirect('/dashboard')
 
 class StudentView(AdminRequiredMixin, View):
     def get(self, request):

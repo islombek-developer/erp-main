@@ -2,14 +2,14 @@ from django import forms
 from .models import Homework,Davomat
 
 class HomeworkForm(forms.Form):
-    description = forms.CharField(widget=forms.Textarea())
+    description = forms.CharField(widget=forms.TextInput({'class': 'form-control'}))
     homework_file = forms.FileField(widget=forms.FileInput())
 
 
 class DavomatForm(forms.ModelForm):
     class Meta:
         model = Davomat
-        fields = ['team', 'student', 'status']  # Include the fields you want in the form
+        fields = ['team', 'student', 'status'] 
         widgets = {
             'team': forms.Select(attrs={'class': 'form-control'}),
             'student': forms.Select(attrs={'class': 'form-control'}),

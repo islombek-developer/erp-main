@@ -8,7 +8,7 @@ class Lesson(models.Model):
     date = models.DateField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     homework_status = models.BooleanField(default=False)
-    homework_file = models.FileField(  null=True,blank=True)
+    lesson_file = models.FileField(upload_to='lesson/',  null=True,blank=True)
     video = models.FileField(
         upload_to='video/', 
         validators=[FileExtensionValidator(allowed_extensions=['mp4', 'mp3', 'AVI', 'WMV'])],
@@ -32,6 +32,7 @@ class Homework(models.Model):
     homework_file = models.FileField(upload_to='homeworks', blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
+
     class Meta:
         unique_together = ['student', 'team']
 
@@ -47,9 +48,3 @@ class Davomat(models.Model):
     def __str__(self) -> str:
         return f"{self.student} --> ,{self.data} --> {'Present' if self.status else 'Absent'}"
     
-class Homeworkcheck(models.Model):
-    Homework = models.ForeignKey(Homework,on_delete=models.CASCADE)
-    evaluated_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True, related_name='evaluated_homeworks')
-    grade = models.PositiveIntegerField(validators=[MaxValueValidator(100)], blank=True, null=True)
-    comments = models.TextField(blank=True, null=True)
-    date = models.DateTimeField(auto_now_add=True)
